@@ -1,101 +1,95 @@
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#define MAX 10
 struct process
 {
-  char name[20];
-  int at,tt,bt,wt,status,ct;
-}p[20],temp;
-struct done
-{
-  char name[20];
-  int st,ct;
-}d[20];
+  int at, bt, ct, tt, wt;
+  char pname[10];
+} p[MAX], temp, gant[MAX], idle, min;
 void main()
 {
-  int n,i,j,ls,min,fnd,num,idle;
-  float twt=0.0,ttt=0.0;
-  printf("ENTER THE NUMBER OF PROCESSES : ");
-  scanf("%d",&n);
-  for(i=0;i<n;i++)                        
+  int loc, time, i, n, j, g;
+  float tat = 0, twt = 0;
+  printf("Enter the number of processes :");
+  scanf("%d", &n);
+  for (i = 0; i < n; i++)
   {
-    printf("\nENTER DETAILS OF PROCESS %d",i+1);
-    printf("\nPROCESS NAME : ");
-    scanf(" %s",p[i].name);
-    printf("ARRIVAL TIME : ");
-    scanf("%d",&p[i].at);
-    printf("BURST TIME : ");
-    scanf("%d",&p[i].bt);
-    p[i].status = 0;
+    printf("Enter process name,Arrival time and Burst Time of process : \n");
+    scanf("%s%d%d",p[i].pname,&p[i].at, &p[i].bt);
   }
-  for(i=0,ls=0,num=0,idle=0;ls<n;)
+
+  for (i = 0; i < n - 1; i++)
   {
-    for(j=0,fnd=0;j<n;j++)
+    for (j = 0; j < n - 1; j++)
     {
-      if(i>=p[j].at && p[j].status==0)
+      if (p[j].at > p[j + 1].at)
       {
-        if(fnd==0)
-        {
-          min = j;
-          fnd = 1;
-        }
-        else if(fnd!=0 && p[min].bt>p[j].bt)
-        {
-          min = j;
-        }
+        temp = p[j];
+        p[j] = p[j + 1];
+        p[j + 1] = temp;
       }
     }
-    if(idle==0 && fnd==0)
+  }
+  idle.bt = 0;
+  for (i = 0, g = 0, time = 0; i < n; i++)
+  {
+    if (time < p[i].at)
     {
-      strcpy(d[num].name,"Idle");
-      d[num].st = i;
-      i++;
-      idle = 1;
-    }
-    else if(fnd==1)
-    {
-      if(idle==1)
-      {
-        d[num].ct = i;
-        num++;
-        idle = 0;
-      }
-      strcpy(d[num].name,p[min].name);
-      p[min].status =1;
-      d[num].st = i;
-      d[num].ct = i + p[min].bt;
-      i = d[num].ct;
-      p[min].ct = d[num].ct;
-      p[min].tt = p[min].ct - p[min].at;
-      p[min].wt = p[min].tt - p[min].bt;
-      num++;
-      ls++;
+      gant[g] = idle;
+      gant[g++].ct = time = p[i--].at;
     }
     else
     {
-      i++;
+      loc = i;
+      for (j = i, min.bt = p[j].bt; j < n && p[j].at <= time; j++)
+      {
+        if (p[j].bt < min.bt)
+        {
+          min = p[j];
+          loc = j;
+        }
+      }
+      if (i != loc)
+      {
+        p[loc] = p[i];
+        p[i] = min;
+      }
+      time += p[i].bt;
+      p[i].ct = time;
+      gant[g++] = p[i];
     }
   }
-  printf("\nPROCESS NAME\tCOMPLETION TIME (ms)\tWAITING TIME (ms)\tTURNAROUND TIME (ms)\n\n");
-  for(i=0;i<n;i++)
+  for (i = 0; i < n; i++)
   {
-    printf("%s\t\t\t%d\t\t\t%d\t\t\t%d\n",p[i].name,p[i].ct,p[i].wt,p[i].tt);
-    twt+=p[i].wt;
-    ttt+=p[i].tt;
+    p[i].tt = p[i].ct - p[i].at;
+    p[i].wt = p[i].tt - p[i].bt;
+    twt = twt + p[i].wt;
+    tat = tat + p[i].tt;
   }
-  printf("\n\nGANTT CHART ");
-  printf("\n--------------------------------------------------------------------\n\t");
-  for(i=0;i<num;i++)
+  printf("Gantt chart:\n");
+  for (i = 0; i < g; i++)
   {
-    printf("|");
-    printf("%s\t",d[i].name);
+    if (gant[i].bt == 0)
+      printf("| Idle\t");
+    else
+      printf("| %s\t", gant[i].pname);
   }
-  printf(" |");
-  printf("\n--------------------------------------------------------------------\n\t");
-  for(i=0;i<num;i++)
+  printf("|\n");
+  printf("0\t");
+  for (i = 0; i < g; i++)
+    printf("%2d\t", gant[i].ct);
+  printf("\nTable :\n");
+  printf(" _________________________________\n");
+  printf("|Process| AT | BT | CT | TT | WT |\n");
+  printf("|--------------------------------|\n");
+  for (i = 0; i < n; i++)
   {
-      printf("%d\t",d[i].st);
+    printf("|%s \t| %2d | %2d | %2d | %2d | %2d |\n", p[i].pname, p[i].at, p[i].bt, p[i].ct, p[i].tt, p[i].wt);
   }
-  printf("%d\t\n",d[num-1].ct);
-  printf("\nAVERAGE WAITING TIME : %f",(twt/n));
-  printf("\nAVERAGE TURNAROUND TIME : %f\n",(ttt/n));
+  printf(" _________________________________\n");
+  twt = twt / n;
+  tat = tat / n;
+  printf("\nAverage WT:%f\n", twt);
+  printf("Average TT:%f\n", tat);
 }
