@@ -134,7 +134,7 @@ void main()
             printf("%s\t|", g[m].pname);
         }
     }
-    printf("%d\t", g[0].st);
+    printf("\n%d\t", g[0].st);
     for (m = 0; m < num; m++)
     {
         if (strcmp(g[m].pname, g[m + 1].pname) == 0)//same
