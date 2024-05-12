@@ -3,90 +3,95 @@
 #define MAX 10
 struct process
 {
-	int at,bt,ct,no,tt,wt,pr;
-    char prname[10];
-}p[MAX],temp,gant[MAX],idle,min;
-void main()
+	int at,bt,ct,no,tt,wt,pr,st,status;
+    char name[10];
+}p[MAX],temp,gant[MAX];
+int main()
 {
-	int loc,time,i,n,j,g;
+	int i,n,j,g,f,min;
 	float tat=0,twt=0;
+	int idle=0,ls=0;
+
 	printf("Enter the number of processes :");
 	scanf("%d",&n);
 	for(i=0;i<n;i++)
 	{
 		printf("Enter Process name Arrival time, Burst Time and Priority of process %d : \n",i+1);
-		scanf("%s%d%d%d",p[i].prname,&p[i].at,&p[i].bt,&p[i].pr);
-		p[i].no=i+1;
+		scanf("%s%d%d%d",p[i].name,&p[i].at,&p[i].bt,&p[i].pr);
+		p[i].status=0;
 	}
-	
-    for(i=0;i<n-1;i++)
-    {
-        for(j=0;j<n-1;j++)
-        {
-            if(p[j].at>p[j+1].at)
-            {
-                temp=p[j];
-                p[j]=p[j+1];
-                p[j+1]=temp;
-            }
-        }
-    }
-
-	idle.bt=0;
-	for(i=0,g=0,time=0;i<n;i++)
+	i=0;
+	while(ls<n)
 	{
-		if(time<p[i].at)
+		for(j=0,f=0;j<n;j++)
 		{
-			gant[g]=idle;
-    		gant[g++].ct=time=p[i--].at;
+			if(i>=p[j].at && p[j].status==0)//jth process can be taken to ready q
+			{
+				if(f==0)//ready q was empty
+				{
+					min=j;
+					f=1;
+				}
+				else if(p[min].pr>=p[j].pr && p[min].at>p[j].at)
+				{
+					min=j;
+				}
+			}
+		}
+
+		if(idle==0 && f==0)//front=0 means ready q empty
+		{
+			strcpy(gant[g].name,"Idle");
+			gant[g].st=i;
+			i++;
+			idle =1;
+		}
+		else if(f==1)//f=1,processes are in ready q
+		{
+			if(idle==1)//previously CPU was idle 
+			{
+				gant[g].ct=i;
+				g++;
+				idle=0;
+			}
+			strcpy(gant[g].name,p[min].name);
+			p[min].status=1;
+			gant[g].st=i;
+			gant[g].ct=i+p[min].bt;
+			i=gant[g].ct;
+			p[min].ct=gant[g].ct;
+			p[min].wt=p[min].ct-p[min].at;
+			p[min].wt=p[min].tt-p[min].bt;
+			g++;
+			ls++;
 		}
 		else
-		{	
-			loc=i;
-    		for(j=i,min.pr=p[j].pr;j<n&&p[j].at<=time;j++)
-    		{
-    			if(p[j].pr<min.pr)
-    			{
-    				min=p[j];
-    				loc=j;
-    			}
-    		}
-    		if(i!=loc)
-    		{
-    			p[loc]=p[i];
-    			p[i]=min;
-    		}
-    		time+=p[i].bt;
-    		p[i].ct=time;
-	    	gant[g++]=p[i];
+		{
+			i++;
 		}
+
 	}
-	for(i=0;i<n;i++)
-	{
-		p[i].tt=p[i].ct-p[i].at;
-		p[i].wt=p[i].tt-p[i].bt;
-		twt=twt+p[i].wt;
-		tat=tat+p[i].tt;
-	}
+
 	printf("Gantt chart:\n");
 	for(i=0;i<g;i++)
 	{
-		if(gant[i].bt==0)
-			printf("| Idle   ");
-		else
-			printf("| %s   ",gant[i].prname);
+		printf("| %s   ",gant[i].name);
 	}
+
 	printf("|\n");
 	printf("0\t");  
 	for(i=0;i<g;i++)
 		printf("%2d\t",gant[i].ct);
+
 	printf("\nTable :\n");
 	printf(" _____________________________________\n");
 	printf("|Process| AT | BT | P  | CT | TT | WT |\n");
 	printf("|-------------------------------------|\n");
 	for(i=0;i<n;i++)
 	{
-		printf("|p%d \t| %2d | %2d | %2d | %2d | %2d | %2d |\n",p[i].no,p[i].at,p[i].bt,p[i].pr,p[i].ct,p[i].tt,p[i].wt);
+		printf("|%s \t| %2d | %2d | %2d | %2d | %2d | %2d |\n",p[i].name,p[i].at,p[i].bt,p[i].pr,p[i].ct,p[i].tt,p[i].wt);
+		twt=twt+p[i].wt;
+		tat=tat+p[i].tt;
 	}
 	printf(" _____________________________________\n");
 	twt=twt/n;
