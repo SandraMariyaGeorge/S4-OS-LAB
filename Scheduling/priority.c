@@ -5,12 +5,11 @@ struct process
 {
 	int at,bt,ct,no,tt,wt,pr;
     char prname[10];
-};
+}p[MAX],temp,gant[MAX],idle,min;
 void main()
 {
 	int loc,time,i,n,j,g;
 	float tat=0,twt=0;
-	struct process p[MAX],temp,gant[MAX],idle,min;
 	printf("Enter the number of processes :");
 	scanf("%d",&n);
 	for(i=0;i<n;i++)
