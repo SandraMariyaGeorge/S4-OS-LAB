@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <string.h>
-#define MAX 10
 struct process
 {
-	int at, bt, ct, tt, wt, pr, st, status;
+	int at, bt, ct, tt, wt, pr, status;
 	char name[10];
-} p[MAX], temp, gant[MAX];
+} p[50], temp;
+struct gant
+{
+	int st,ct;
+	char name[10];
+
+}gant[50];
 int main()
 {
 	int i, n, j, g, f, min;
@@ -42,6 +47,7 @@ int main()
 		{
 			strcpy(gant[g].name, "Idle");
 			gant[g].st = i;
+			gant[g].ct=i+1;
 			i++;
 			idle = 1;
 		}
