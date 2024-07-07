@@ -5,12 +5,14 @@ struct process
 	int at, bt, ct, tt, wt, pr, status;
 	char name[10];
 } p[50], temp;
+
 struct gant
 {
-	int st,ct;
+	int st, ct;
 	char name[10];
 
-}gant[50];
+} gant[50];
+
 int main()
 {
 	int i, n, j, g, f, min;
@@ -25,6 +27,14 @@ int main()
 		scanf("%s%d%d%d", p[i].name, &p[i].at, &p[i].bt, &p[i].pr);
 		p[i].status = 0;
 	}
+
+	//At each time step, check which processes have arrived.
+ 	//Among the arrived processes, select the one with the highest priority.
+	//If two processes have the same priority, select the one that arrived first.
+	//If no process has arrived, the CPU remains idle.
+	//If the CPU was idle in the previous time step, and no process has arrived, the CPU remains idle.
+	//If the CPU was idle in the previous time step, and a process has arrived, the process is selected.
+
 	i = 0;
 	while (ls < n)
 	{
@@ -47,7 +57,7 @@ int main()
 		{
 			strcpy(gant[g].name, "Idle");
 			gant[g].st = i;
-			gant[g].ct=i+1;
+			gant[g].ct = i + 1;
 			i++;
 			idle = 1;
 		}
@@ -103,3 +113,5 @@ int main()
 	printf("\nAverage WT:%f\n", twt);
 	printf("Average TT:%f\n", tat);
 }
+
+
